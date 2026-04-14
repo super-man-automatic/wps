@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="wps/wps.vcxproj" Id="b3ceb3f9-47d4-446e-859e-f944ea4f846d" />
+</Solution>
