@@ -21,6 +21,7 @@ public:
 
 signals:
     void insertTextRequested(const QString& text);
+<<<<<<< HEAD
     void insertTextAtPosition(const QString& text, int position);
     void requestCursorPositionAndText();
 
@@ -29,13 +30,23 @@ public slots:
     void onTextSelected(const QString& selected);
     void onCursorPositionAndTextReceived(int position, const QString& text_before);
     void stopGeneration();
+=======
+    void replaceTextRequested(const QString& old_text, const QString& new_text);
+
+public slots:
+    void onTextSelected(const QString& selected);
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 private slots:
     void onContinueWriting();
     void onPolish();
     void onSummarize();
     void onSendMessage();
+<<<<<<< HEAD
     void onStreamChunk(const QString& chunk, bool is_finish);
+=======
+    void onStreamChunk(const QString& chunk);
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 private:
     void setupUI();
@@ -56,9 +67,12 @@ private:
 
     QString current_context_;
     QString selected_text_;
+<<<<<<< HEAD
     QString accumulated_text_;
     int continue_write_position_ = -1;
     bool stop_requested_ = false;
+=======
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 };
 
 } // namespace gui

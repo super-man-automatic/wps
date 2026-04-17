@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # SmartDoc - 文档编辑器
+=======
+# 🎨 SmartDoc AI - 智能文档编辑器
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-blueviolet.svg)
@@ -9,22 +13,36 @@
 
 ---
 
+<<<<<<< HEAD
 ## 核心特性
 
 ### AI 功能
+=======
+## ✨ 核心特性
+
+### 🤖 AI 功能
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 - **续写**: 根据上下文智能补全内容
 - **润色**: 优化文本表达和语言流畅性
 - **摘要**: 快速生成文档核心要点
 - **对话**: 侧边栏 AI 助手实时对话
 - **翻译**: 支持多语言翻译（规划中）
 
+<<<<<<< HEAD
 ### 高性能编辑
+=======
+### ⚡ 高性能编辑
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 - **大文件支持**: 10 万+ 行文档秒级加载
 - **分块加载**: 智能懒加载与预加载
 - **线程安全**: 基于 shared_mutex 的并发读写
 - **实时同步**: AI 后台分析，UI 始终响应
 
+<<<<<<< HEAD
 ### 开发者友好
+=======
+### 🎯 开发者友好
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 - **模块化设计**: core/ai/gui/plugin 四层架构
 - **完整测试**: Google Test 单元测试框架
 - **插件系统**: 支持 C++/Python/Lua 扩展
@@ -32,7 +50,11 @@
 
 ---
 
+<<<<<<< HEAD
 ## 快速开始
+=======
+## 🚀 快速开始
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ### 环境需求
 
@@ -81,7 +103,11 @@ cmake --build . --parallel 4
 
 ---
 
+<<<<<<< HEAD
 ## 项目结构
+=======
+## 📖 项目结构
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ```
 SmartDoc/
@@ -114,7 +140,11 @@ SmartDoc/
 
 ---
 
+<<<<<<< HEAD
 ## 使用示例
+=======
+## 💡 使用示例
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ### 基础编辑
 
@@ -140,7 +170,11 @@ SmartDoc/
 
 ---
 
+<<<<<<< HEAD
 ## 配置 OpenAI API
+=======
+## 🔧 配置 OpenAI API
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 默认使用 Mock 后端。要启用真实 AI 功能：
 
@@ -161,7 +195,11 @@ ai_client_->setApiKey("your-api-key-here");
 
 ---
 
+<<<<<<< HEAD
 ## 运行测试
+=======
+## 🧪 运行测试
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ```bash
 cd build
@@ -178,7 +216,11 @@ cd build
 
 ---
 
+<<<<<<< HEAD
 ## 开发路线图
+=======
+## 🛣️ 开发路线图
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ### Phase 1 (当前) - MVP ✅
 - [x] 基础编辑器 UI
@@ -201,7 +243,11 @@ cd build
 
 ---
 
+<<<<<<< HEAD
 ## 贡献指南
+=======
+## 🤝 贡献指南
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 欢迎提交 Issue 和 Pull Request！
 
@@ -220,13 +266,21 @@ cd build
 
 ---
 
+<<<<<<< HEAD
 ## 许可证
+=======
+## 📄 许可证
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 本项目采用 MIT 许可证，详见 [LICENSE](LICENSE) 文件
 
 ---
 
+<<<<<<< HEAD
 ## 作者
+=======
+## 👨‍💻 作者
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 SmartDoc 由以下开发者维护：
 
@@ -234,7 +288,11 @@ SmartDoc 由以下开发者维护：
 
 ---
 
+<<<<<<< HEAD
 ## 社区与支持
+=======
+## 💬 社区与支持
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 - **问题反馈**: [GitHub Issues](https://github.com/yourusername/SmartDoc/issues)
 - **讨论**: [GitHub Discussions](https://github.com/yourusername/SmartDoc/discussions)
@@ -242,7 +300,11 @@ SmartDoc 由以下开发者维护：
 
 ---
 
+<<<<<<< HEAD
 ## 致谢
+=======
+## 🙏 致谢
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 感谢以下开源项目的支持：
 
@@ -254,6 +316,12 @@ SmartDoc 由以下开发者维护：
 
 <div align="center">
 
+<<<<<<< HEAD
 **如果这个项目对你有帮助，请给个 Star！**
+=======
+**⭐ 如果这个项目对你有帮助，请给个 Star！**
+
+Made with ❤️ for developers and writers
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 </div>

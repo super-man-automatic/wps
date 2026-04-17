@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
  * Qt 组件使用说明：
  * 
@@ -47,6 +48,18 @@
 #include <QRegularExpression> // 正则表达式 - 统计词数
 #include <QStatusBar>    // 状态栏 - 底部信息显示
 #include <QShortcut>     // 快捷键 - 直接绑定到窗口
+=======
+#include "mainwindow.h"
+#include "editor_widget.h"
+#include "ai_sidebar.h"
+#include <QMenuBar>
+#include <QMenu>
+#include <QAction>
+#include <QHBoxLayout>
+#include <QWidget>
+#include <QMessageBox>
+#include <QFileDialog>
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 namespace gui {
 
@@ -58,6 +71,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     setupUI();
     setupMenuBar();
+<<<<<<< HEAD
     setupStatusBar();
     setupConnections();
     
@@ -72,6 +86,9 @@ MainWindow::MainWindow(QWidget* parent)
     connect(font_dec_shortcut, &QShortcut::activated, this, &MainWindow::onFontSizeDecrease);
     
     updateStatusBar();
+=======
+    setupConnections();
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 }
 
 MainWindow::~MainWindow() {
@@ -84,7 +101,10 @@ void MainWindow::setupUI() {
 
     // 编辑器
     editor_ = std::make_unique<EditorWidget>();
+<<<<<<< HEAD
     editor_->installEventFilter(this); // Install event filter to catch Ctrl+C
+=======
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
     layout->addWidget(editor_.get(), 3);
 
     // AI侧边栏
@@ -97,6 +117,7 @@ void MainWindow::setupUI() {
 }
 
 void MainWindow::setupMenuBar() {
+<<<<<<< HEAD
     // File menu
     auto file_menu = menuBar()->addMenu(tr("&File"));
 
@@ -146,11 +167,30 @@ void MainWindow::setupMenuBar() {
     connect(theme_action, &QAction::triggered, this, &MainWindow::onToggleTheme);
 
     // Help menu
+=======
+    auto file_menu = menuBar()->addMenu(tr("&File"));
+
+    auto new_action = file_menu->addAction(tr("&New"));
+    connect(new_action, &QAction::triggered, this, &MainWindow::onNewDocument);
+
+    auto open_action = file_menu->addAction(tr("&Open"));
+    connect(open_action, &QAction::triggered, this, &MainWindow::onOpenDocument);
+
+    auto save_action = file_menu->addAction(tr("&Save"));
+    connect(save_action, &QAction::triggered, this, &MainWindow::onSaveDocument);
+
+    file_menu->addSeparator();
+
+    auto exit_action = file_menu->addAction(tr("E&xit"));
+    connect(exit_action, &QAction::triggered, this, &QWidget::close);
+
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
     auto help_menu = menuBar()->addMenu(tr("&Help"));
     auto about_action = help_menu->addAction(tr("&About"));
     connect(about_action, &QAction::triggered, this, &MainWindow::onAbout);
 }
 
+<<<<<<< HEAD
 void MainWindow::setupStatusBar() {
     statusBar()->showMessage(tr("Ready"));
 }
@@ -204,19 +244,37 @@ void MainWindow::onNewDocument() {
         editor_->clear();
     }
     updateStatusBar();
+=======
+void MainWindow::setupConnections() {
+    // TODO: 连接编辑器和AI侧边栏的信号
+}
+
+void MainWindow::onNewDocument() {
+    if (editor_) {
+        editor_->clear();
+    }
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 }
 
 void MainWindow::onOpenDocument() {
     QString file_path = QFileDialog::getOpenFileName(
         this, tr("Open File"), "",
+<<<<<<< HEAD
         tr("Text Files (*.txt);;All Files (*)"));
 
     if (!file_path.isEmpty()) {
         loadFile(file_path);
+=======
+        tr("Markdown Files (*.md);;Text Files (*.txt);;All Files (*)"));
+
+    if (!file_path.isEmpty() && editor_) {
+        editor_->openFile(file_path.toStdString());
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
     }
 }
 
 void MainWindow::onSaveDocument() {
+<<<<<<< HEAD
     if (current_file_path_.isEmpty()) {
         onSaveAsDocument();
     } else {
@@ -239,10 +297,16 @@ void MainWindow::onClearDocument() {
         editor_->clear();
     }
     updateStatusBar();
+=======
+    if (editor_) {
+        editor_->saveFile();
+    }
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 }
 
 void MainWindow::onAbout() {
     QMessageBox::about(this, tr("About SmartDoc"),
+<<<<<<< HEAD
         tr("SmartDoc AI Editor v0.2.0\n\n"
            "A smart document editor with AI assistance.\n"
            "Features: AI writing, file operations, dark/light mode.\n"
@@ -410,4 +474,11 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
     return QMainWindow::eventFilter(obj, event);
 }
 
+=======
+        tr("SmartDoc AI Editor v0.1.0\n\n"
+           "A smart document editor with AI assistance.\n"
+           "Copyright 2024"));
+}
+
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 } // namespace gui

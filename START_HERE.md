@@ -1,8 +1,16 @@
+<<<<<<< HEAD
 # SmartDoc 项目已完成
 
 ## 完成清单
 
 ### 已为 `wps` 项目创建
+=======
+# 🎉 SmartDoc 项目已完成并集成到 WPS！
+
+## ✅ 完成清单
+
+### 📦 已为 `wps` 项目创建
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ✅ **源代码文件** (12 个)
 - `src/main.cpp` - 程序入口
@@ -33,7 +41,11 @@
 
 ---
 
+<<<<<<< HEAD
 ## 现在就开始编译
+=======
+## 🎯 现在就开始编译
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ### 最快方法（3 行命令）
 
@@ -53,7 +65,11 @@ cmake --build --preset Qt-Debug
 
 ---
 
+<<<<<<< HEAD
 ## 项目规模
+=======
+## 📊 项目规模
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 | 指标 | 数值 |
 |------|------|
@@ -66,7 +82,11 @@ cmake --build --preset Qt-Debug
 
 ---
 
+<<<<<<< HEAD
 ## 你将看到什么
+=======
+## 🎨 你将看到什么
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 运行 `SmartDoc.exe` 后：
 
@@ -94,7 +114,11 @@ cmake --build --preset Qt-Debug
 
 ---
 
+<<<<<<< HEAD
 ## 核心功能演示
+=======
+## 🚀 核心功能演示
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ### 1️⃣ 续写文章
 
@@ -122,7 +146,11 @@ cmake --build --preset Qt-Debug
 
 ---
 
+<<<<<<< HEAD
 ## 技术亮点
+=======
+## ⚙️ 技术亮点
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ✨ **线程安全** - shared_mutex 保证并发读写  
 ✨ **流式响应** - Mock 演示数据，逐字显示  
@@ -133,7 +161,11 @@ cmake --build --preset Qt-Debug
 
 ---
 
+<<<<<<< HEAD
 ## 文档速览
+=======
+## 📚 文档速览
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 | 文档 | 用途 |
 |------|------|
@@ -145,7 +177,11 @@ cmake --build --preset Qt-Debug
 
 ---
 
+<<<<<<< HEAD
 ## 现在你有了
+=======
+## 🎁 现在你有了
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ✅ **完整的 MVP 版本**
 - 可立即编译运行
@@ -167,7 +203,11 @@ cmake --build --preset Qt-Debug
 
 ---
 
+<<<<<<< HEAD
 ## 接下来怎么做？
+=======
+## 🎯 接下来怎么做？
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ### 立即 (现在)
 1. ✅ 按上面的 3 行命令编译运行
@@ -201,7 +241,11 @@ cmake --build --preset Qt-Debug
 
 ---
 
+<<<<<<< HEAD
 ## 遇到问题？
+=======
+## 🐛 遇到问题？
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ### 编译失败
 
@@ -239,7 +283,11 @@ cmake --build --preset Qt-Debug
 
 ---
 
+<<<<<<< HEAD
 ## 项目中的关键代码
+=======
+## 💡 项目中的关键代码
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ### 文档模型 (线程安全)
 ```cpp
@@ -266,7 +314,11 @@ auto prompt = pm.build(PromptManager::Task::ContinueWriting, content);
 
 ---
 
+<<<<<<< HEAD
 ## 项目统计
+=======
+## 📦 项目统计
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ```
 SmartDoc Project Statistics:
@@ -287,7 +339,11 @@ Build Tool:         Ninja / Visual Studio 2022
 
 ---
 
+<<<<<<< HEAD
 ## 你完成的成就
+=======
+## 🌟 你完成的成就
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 🎓 **学习成果**
 - 学了现代 C++ 设计模式
@@ -309,7 +365,11 @@ Build Tool:         Ninja / Visual Studio 2022
 
 ---
 
+<<<<<<< HEAD
 ## 现在就开始吧！
+=======
+## 🎬 现在就开始吧！
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 ```powershell
 # 复制这 4 行到 PowerShell
@@ -327,7 +387,11 @@ cmake --build --preset Qt-Debug
 
 ---
 
+<<<<<<< HEAD
 ## 需要帮助？
+=======
+## 📞 需要帮助？
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 - 📖 编译问题 → 查看 `BUILD.md`
 - 📖 代码问题 → 查看源文件中的注释
@@ -339,7 +403,11 @@ cmake --build --preset Qt-Debug
 
 <div align="center">
 
+<<<<<<< HEAD
 ## 恭喜！项目已完整创建
+=======
+## 🎉 恭喜！项目已完整创建
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 **你现在拥有一个完整的、可编译、可运行的 SmartDoc AI 编辑器！**
 

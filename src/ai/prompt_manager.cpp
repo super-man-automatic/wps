@@ -8,6 +8,7 @@ PromptManager::PromptManager() {
 
 void PromptManager::initDefaultPrompts() {
     templates_[static_cast<int>(Task::ContinueWriting)] =
+<<<<<<< HEAD
         reinterpret_cast<const char*>(u8"请续写以下内容：\n\n{{content}}");
 
     templates_[static_cast<int>(Task::Polish)] =
@@ -30,6 +31,30 @@ void PromptManager::initDefaultPrompts() {
 
     templates_[static_cast<int>(Task::CodeExplain)] =
         reinterpret_cast<const char*>(u8"请用{{language}}语言解释以下代码的功能和逻辑：\n\n{{content}}\n\n");
+=======
+        "请根据以下内容继续创意写作，语言保持{{language}}：\n\n{{content}}\n\n";
+
+    templates_[static_cast<int>(Task::Polish)] =
+        "请润色以下{{language}}文本，使其更加流畅和有表现力：\n\n{{content}}\n\n";
+
+    templates_[static_cast<int>(Task::Translate)] =
+        "请将以下文本翻译成{{language}}：\n\n{{content}}\n\n";
+
+    templates_[static_cast<int>(Task::Summarize)] =
+        "请用{{language}}总结以下文本的核心要点，保持原意：\n\n{{content}}\n\n";
+
+    templates_[static_cast<int>(Task::Explain)] =
+        "请用简单清晰的{{language}}语言解释以下内容：\n\n{{content}}\n\n";
+
+    templates_[static_cast<int>(Task::FixGrammar)] =
+        "请检查并修正以下{{language}}文本的语法错误：\n\n{{content}}\n\n";
+
+    templates_[static_cast<int>(Task::GenerateOutline)] =
+        "请为以下{{language}}文本生成一个详细的大纲：\n\n{{content}}\n\n";
+
+    templates_[static_cast<int>(Task::CodeExplain)] =
+        "请用{{language}}语言解释以下代码的功能和逻辑：\n\n{{content}}\n\n";
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 }
 
 std::string PromptManager::build(Task task,

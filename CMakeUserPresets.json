@@ -8,6 +8,7 @@
       "binaryDir": "${sourceDir}/out/build/debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
+<<<<<<< HEAD
         "CMAKE_CXX_FLAGS": "-DQT_QML_DEBUG",
         "CMAKE_C_COMPILER": "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/cl.exe",
         "CMAKE_CXX_COMPILER": "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/cl.exe"
@@ -16,6 +17,12 @@
         "QML_DEBUG_ARGS": "-qmljsdebugger=file:{8aa7a333-598b-4feb-bc00-4519c4c652f0},block",
         "LIB": "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.50.35717/lib/x64;D:/Windows Kits/10/lib/10.0.26100.0/ucrt/x64;D:/Windows Kits/10/lib/10.0.26100.0/um/x64",
         "INCLUDE": "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.50.35717/include;D:/Windows Kits/10/include/10.0.26100.0/ucrt;D:/Windows Kits/10/include/10.0.26100.0/um;D:/Windows Kits/10/include/10.0.26100.0/shared"
+=======
+        "CMAKE_CXX_FLAGS": "-DQT_QML_DEBUG"
+      },
+      "environment": {
+        "QML_DEBUG_ARGS": "-qmljsdebugger=file:{06a3253f-6f00-43ba-9f72-0923e2038bbb},block"
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
       }
     },
     {
@@ -56,6 +63,7 @@
       }
     }
   ],
+<<<<<<< HEAD
   "buildPresets": [
     {
       "name": "Qt-Debug",
@@ -71,6 +79,11 @@
   "vendor": {
     "qt-project.org/Presets": {
       "checksum": "53iXzrrlc2XLGX6xylJEP1ZwroI="
+=======
+  "vendor": {
+    "qt-project.org/Presets": {
+      "checksum": "2nYbeWRTi7H4Yx4qBfy0k2DiEe0="
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
     }
   }
 }

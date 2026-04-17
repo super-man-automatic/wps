@@ -1,4 +1,5 @@
 #include "llm_client.h"
+<<<<<<< HEAD
 #include "prompt_manager.h"
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -22,14 +23,27 @@
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
+=======
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QUrl>
+#include <QByteArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <thread>
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
 namespace ai {
 
 LLMClient::LLMClient(Backend backend, QObject* parent)
     : QObject(parent), backend_(backend) {
+<<<<<<< HEAD
     // Generate unique session ID for this program instance
     // This ensures each program restart is like a "new tab" - completely fresh context
     session_id_ = QUuid::createUuid().toString(QUuid::WithoutBraces);
+=======
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 }
 
 LLMClient::~LLMClient() {
@@ -39,6 +53,7 @@ void LLMClient::setApiKey(const std::string& key) {
     api_key_ = key;
 }
 
+<<<<<<< HEAD
 void LLMClient::setApiSecret(const std::string& secret) {
     api_secret_ = secret;
 }
@@ -51,6 +66,8 @@ void LLMClient::stop() {
     should_stop_ = true;
 }
 
+=======
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 void LLMClient::setLocalModelPath(const std::string& path) {
     local_model_path_ = path;
 }
@@ -60,6 +77,7 @@ void LLMClient::setBackend(Backend backend) {
 }
 
 bool LLMClient::isReady() const {
+<<<<<<< HEAD
     return !api_key_.empty() && !api_secret_.empty() && !app_id_.empty();
 }
 
@@ -82,10 +100,42 @@ std::string LLMClient::complete(const std::string& prompt, const std::string& mo
     cv.wait(lock, [&] { return done; });
     
     return result;
+=======
+    if (backend_ == Backend::OpenAI) {
+        return !api_key_.empty();
+    } else if (backend_ == Backend::LocalLLaMA) {
+        return !local_model_path_.empty();
+    }
+    return true;  // Mock always ready
+}
+
+std::string LLMClient::complete(const std::string& prompt, const std::string& model) {
+    // 简化同步版本
+    if (backend_ == Backend::Mock) {
+        return "Mock response to: " + prompt;
+    }
+
+    // TODO: 实现真实的HTTP请求
+    return "";
+}
+
+void LLMClient::completeStream(const std::string& prompt,
+                               StreamCallback on_chunk,
+                               const std::string& model) {
+    // 在后台线程运行以避免阻塞
+    std::thread([this, prompt, on_chunk, model]() {
+        if (backend_ == Backend::OpenAI) {
+            requestOpenAI(prompt, on_chunk);
+        } else if (backend_ == Backend::Mock) {
+            requestMock(prompt, on_chunk);
+        }
+    }).detach();
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 }
 
 std::future<std::string> LLMClient::completeAsync(const std::string& prompt) {
     return std::async(std::launch::async, [this, prompt]() {
+<<<<<<< HEAD
         return this->complete(prompt);
     });
 }
@@ -133,14 +183,22 @@ void LLMClient::requestMock(const std::string& prompt, StreamCallback cb) {
         
         StreamChunk finish_chunk{"", true, 1.0f};
         cb(finish_chunk);
+=======
+        return complete(prompt);
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
     });
 }
 
 void LLMClient::requestOpenAI(const std::string& prompt, StreamCallback cb) {
+<<<<<<< HEAD
+=======
+    // TODO: 实现OpenAI API调用
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
     StreamChunk chunk{"[API Key not configured]", true, 0.0f};
     cb(chunk);
 }
 
+<<<<<<< HEAD
 void LLMClient::requestXunfei(const std::string& prompt, StreamCallback cb) {
     QString host = "spark-api.xf-yun.com";
     QString path = "/x2";
@@ -418,6 +476,26 @@ void LLMClient::requestXunfei(const std::string& prompt, StreamCallback cb) {
 }
 
 std::string LLMClient::parseOpenAIResponse(const std::string& response) {
+=======
+void LLMClient::requestMock(const std::string& prompt, StreamCallback cb) {
+    // 模拟流式响应
+    std::string mock_response = "这是一个模拟AI响应。您输入的prompt是: " + prompt;
+
+    // 按字符流式发送
+    for (char c : mock_response) {
+        StreamChunk chunk{std::string(1, c), false, 1.0f};
+        cb(chunk);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+
+    // 发送结束信号
+    StreamChunk finish_chunk{"", true, 1.0f};
+    cb(finish_chunk);
+}
+
+std::string LLMClient::parseOpenAIResponse(const std::string& response) {
+    // 简单的JSON解析（实际应用应用QJsonDocument）
+>>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
     return response;
 }
 
