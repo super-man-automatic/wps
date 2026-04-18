@@ -38,7 +38,6 @@ namespace ai {
 
 LLMClient::LLMClient(Backend backend, QObject* parent)
     : QObject(parent), backend_(backend) {
-<<<<<<< HEAD
     // Generate unique session ID for this program instance
     // This ensures each program restart is like a "new tab" - completely fresh context
     session_id_ = QUuid::createUuid().toString(QUuid::WithoutBraces);
