@@ -8,11 +8,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 # 查找所需包
-<<<<<<< HEAD
 find_package(Qt6 COMPONENTS Core Gui Widgets Network Concurrent REQUIRED)
-=======
-find_package(Qt6 COMPONENTS Core Gui Widgets Network REQUIRED)
->>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 find_package(GTest REQUIRED)
 
 # 项目源文件
@@ -42,24 +38,18 @@ set(HEADERS
 # 创建可执行文件
 add_executable(SmartDoc ${SOURCES} ${HEADERS})
 
-<<<<<<< HEAD
 # Ensure target architecture matches the generator/platform (prefer 64-bit)
 if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(WARNING "Building for 32-bit target; this project expects 64-bit. Consider using a 64-bit generator/toolset.")
 endif()
 
-=======
->>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 # 链接库
 target_link_libraries(SmartDoc
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
     Qt6::Network
-<<<<<<< HEAD
     Qt6::Concurrent
-=======
->>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 )
 
 # 包含目录
@@ -67,15 +57,12 @@ target_include_directories(SmartDoc PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-<<<<<<< HEAD
 if(MSVC)
     # Ensure exception handling model is enabled for MSVC (/EHsc)
     # Force UTF-8 encoding for source files and execution character set
     target_compile_options(SmartDoc PRIVATE /EHsc /utf-8)
 endif()
 
-=======
->>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 # 测试
 enable_testing()
 add_subdirectory(tests)

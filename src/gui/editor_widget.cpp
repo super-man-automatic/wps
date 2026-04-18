@@ -18,11 +18,8 @@ EditorWidget::EditorWidget(QWidget* parent)
     // 连接信号
     connect(this, &QPlainTextEdit::textChanged,
             this, &EditorWidget::onTextChanged);
-<<<<<<< HEAD
     connect(this, &QPlainTextEdit::selectionChanged,
             this, &EditorWidget::onSelectionChanged);
-=======
->>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 
     setPlaceholderText("开始编写文档...\n使用侧边栏的AI功能辅助写作");
 }
@@ -33,7 +30,6 @@ EditorWidget::~EditorWidget() {
 void EditorWidget::onTextChanged() {
     std::string text = toPlainText().toStdString();
     document_->loadFromString(text);
-<<<<<<< HEAD
     emit contentChanged(QString::fromStdString(text));
 }
 
@@ -41,9 +37,6 @@ void EditorWidget::onSelectionChanged() {
     QTextCursor cursor = textCursor();
     QString selected = cursor.selectedText();
     emit selectionChanged(selected);
-=======
-    emit textChanged(QString::fromStdString(text));
->>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
 }
 
 void EditorWidget::openFile(const std::string& path) {

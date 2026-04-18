@@ -1,5 +1,4 @@
 #include <QApplication>
-<<<<<<< HEAD
 #include <clocale>
 #include "gui/mainwindow.h"
 
@@ -16,12 +15,6 @@ int main(int argc, char* argv[]) {
 
     // Force UTF-8 locale for std::string conversions
     std::setlocale(LC_ALL, ".UTF8");
-
-=======
-#include "gui/mainwindow.h"
-
-int main(int argc, char* argv[]) {
->>>>>>> 5475e174cf498978befe4c9d3f475f4a1cc6c9bd
     QApplication app(argc, argv);
 
     gui::MainWindow window;
