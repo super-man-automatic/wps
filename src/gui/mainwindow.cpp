@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "editor_widget.h"
 #include "ai_sidebar.h"
+#ifdef ENABLE_IMAGE_FEATURES
+#include "image_editor_dialog.h"
+#endif
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
@@ -16,6 +19,10 @@
 #include <QRegularExpression>
 #include <QStatusBar>
 #include <QShortcut>
+#ifdef ENABLE_IMAGE_FEATURES
+#include <QImageReader>
+#include <QBuffer>
+#endif
 
 namespace gui {
 
@@ -112,6 +119,40 @@ void MainWindow::setupMenuBar() {
     auto theme_action = view_menu->addAction(tr("&Toggle Dark/Light Mode"));
     theme_action->setShortcut(QKeySequence("Ctrl+T"));
     connect(theme_action, &QAction::triggered, this, &MainWindow::onToggleTheme);
+
+#ifdef ENABLE_IMAGE_FEATURES
+    // Image menu
+    auto image_menu = menuBar()->addMenu(tr("&Image"));
+    
+    auto insert_image_action = image_menu->addAction(tr("&Insert Image from File..."));
+    insert_image_action->setShortcut(QKeySequence("Ctrl+Shift+I"));
+    connect(insert_image_action, &QAction::triggered, this, &MainWindow::onInsertImageFromFile);
+    
+    auto edit_image_action = image_menu->addAction(tr("&Edit Image..."));
+    connect(edit_image_action, &QAction::triggered, this, &MainWindow::onEditImage);
+    
+    image_menu->addSeparator();
+    
+    auto resize_image_action = image_menu->addAction(tr("&Resize Image..."));
+    connect(resize_image_action, &QAction::triggered, this, &MainWindow::onResizeImage);
+    
+    auto rotate_image_action = image_menu->addAction(tr("&Rotate Image..."));
+    connect(rotate_image_action, &QAction::triggered, this, &MainWindow::onRotateImage);
+    
+    auto crop_image_action = image_menu->addAction(tr("&Crop Image..."));
+    connect(crop_image_action, &QAction::triggered, this, &MainWindow::onCropImage);
+    
+    image_menu->addSeparator();
+    
+    auto grayscale_action = image_menu->addAction(tr("Apply &Grayscale"));
+    connect(grayscale_action, &QAction::triggered, this, &MainWindow::onApplyGrayscale);
+    
+    auto blur_action = image_menu->addAction(tr("Apply &Blur"));
+    connect(blur_action, &QAction::triggered, this, &MainWindow::onApplyBlur);
+    
+    auto sharpen_action = image_menu->addAction(tr("Apply &Sharpen"));
+    connect(sharpen_action, &QAction::triggered, this, &MainWindow::onApplySharpen);
+#endif
 
     // Help menu
     auto help_menu = menuBar()->addMenu(tr("&Help"));
@@ -377,5 +418,123 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
     }
     return QMainWindow::eventFilter(obj, event);
 }
+
+#ifdef ENABLE_IMAGE_FEATURES
+// 纯 Qt 实现，完美显示图片，插入时无 OpenCV 依赖
+void MainWindow::onInsertImageFromFile() {
+    QString file_path = QFileDialog::getOpenFileName(
+        this, tr("Insert Image"), "",
+        tr("Images (*.png *.jpg *.jpeg *.bmp *.gif)"));
+
+    if (file_path.isEmpty()) return;
+
+    // 调用 EditorWidget 的 insertImage 方法
+    if (editor_) {
+        editor_->insertImage(file_path);
+        statusBar()->showMessage("Image inserted", 2000);
+    }
+}
+
+void MainWindow::onEditImage() {
+    if (!has_image_) {
+        QMessageBox::information(this, tr("No Image"), tr("Please insert an image first."));
+        return;
+    }
+    
+    if (!image_editor_) {
+        image_editor_ = std::make_unique<ImageEditorDialog>(this);
+    }
+    
+    if (image_editor_->loadImage(current_image_)) {
+        if (image_editor_->exec() == QDialog::Accepted) {
+            current_image_ = image_editor_->getResultImage();
+            statusBar()->showMessage(tr("Image edited successfully"), 2000);
+        }
+    }
+}
+
+void MainWindow::onResizeImage() {
+    if (!has_image_) {
+        QMessageBox::information(this, tr("No Image"), tr("Please insert an image first."));
+        return;
+    }
+    
+    onEditImage();
+}
+
+void MainWindow::onRotateImage() {
+    if (!has_image_) {
+        QMessageBox::information(this, tr("No Image"), tr("Please insert an image first."));
+        return;
+    }
+    
+    onEditImage();
+}
+
+void MainWindow::onCropImage() {
+    if (!has_image_) {
+        QMessageBox::information(this, tr("No Image"), tr("Please insert an image first."));
+        return;
+    }
+    
+    onEditImage();
+}
+
+void MainWindow::onApplyGrayscale() {
+    if (!has_image_) {
+        QMessageBox::information(this, tr("No Image"), tr("Please insert an image first."));
+        return;
+    }
+    
+    if (!image_editor_) {
+        image_editor_ = std::make_unique<ImageEditorDialog>(this);
+    }
+    
+    if (image_editor_->loadImage(current_image_)) {
+        // Apply grayscale directly
+        image_editor_->applyGrayscale();
+        current_image_ = image_editor_->getResultImage();
+        statusBar()->showMessage(tr("Grayscale filter applied"), 2000);
+    }
+}
+
+void MainWindow::onApplyBlur() {
+    if (!has_image_) {
+        QMessageBox::information(this, tr("No Image"), tr("Please insert an image first."));
+        return;
+    }
+    
+    if (!image_editor_) {
+        image_editor_ = std::make_unique<ImageEditorDialog>(this);
+    }
+    
+    if (image_editor_->loadImage(current_image_)) {
+        image_editor_->applyBlur(5);
+        current_image_ = image_editor_->getResultImage();
+        statusBar()->showMessage(tr("Blur filter applied"), 2000);
+    }
+}
+
+void MainWindow::onApplySharpen() {
+    if (!has_image_) {
+        QMessageBox::information(this, tr("No Image"), tr("Please insert an image first."));
+        return;
+    }
+    
+    if (!image_editor_) {
+        image_editor_ = std::make_unique<ImageEditorDialog>(this);
+    }
+    
+    if (image_editor_->loadImage(current_image_)) {
+        image_editor_->applySharpen();
+        current_image_ = image_editor_->getResultImage();
+        statusBar()->showMessage(tr("Sharpen filter applied"), 2000);
+    }
+}
+
+void MainWindow::onInsertImage() {
+    onInsertImageFromFile();
+}
+#endif
 
 } // namespace gui

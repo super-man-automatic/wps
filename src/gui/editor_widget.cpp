@@ -1,6 +1,12 @@
 #include "editor_widget.h"
 #include "../core/document.h"
 #include <QFont>
+#include <QImage>
+#include <QTextCursor>
+#include <QTextImageFormat>
+#include <QTextDocument>
+#include <QUrl>
+#include <QDateTime>
 #include <fstream>
 #include <sstream>
 
@@ -63,6 +69,38 @@ std::string EditorWidget::getText() const {
 
 void EditorWidget::setText(const std::string& text) {
     setPlainText(QString::fromStdString(text));
+}
+
+void EditorWidget::insertImage(const QString& imagePath) {
+    QImage image(imagePath);
+    if (image.isNull()) {
+        return;
+    }
+
+    // 缩放到合适大小
+    if (image.width() > 600) {
+        image = image.scaledToWidth(600, Qt::SmoothTransformation);
+    }
+
+    // 1. 把图片加入文档资源（关键！这样就不会显示占位符）
+    QTextDocument* doc = document();
+    QString imageName = "img_" + QString::number(QDateTime::currentMSecsSinceEpoch());
+    QUrl imageUrl(imageName);
+
+    doc->addResource(QTextDocument::ImageResource, imageUrl, QVariant(image));
+
+    // 2. 插入图片（可自定义显示大小）
+    QTextCursor cursor = textCursor();
+    QTextImageFormat imageFormat;
+    imageFormat.setName(imageUrl.toString());
+    imageFormat.setWidth(image.width());
+    imageFormat.setHeight(image.height());
+
+    cursor.insertImage(imageFormat);
+
+    // 换行
+    cursor.insertText("\n");
+    setTextCursor(cursor);
 }
 
 } // namespace gui

@@ -4,12 +4,18 @@
 #include <QEvent>
 #include <QFile>
 #include <QString>
+#ifdef ENABLE_IMAGE_FEATURES
+#include <QImage>
+#endif
 #include <memory>
 
 namespace gui {
 
 class EditorWidget;
 class AISidebar;
+#ifdef ENABLE_IMAGE_FEATURES
+class ImageEditorDialog;
+#endif
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -32,6 +38,19 @@ private slots:
     void onFontSizeDecrease();
     void onToggleTheme();
     void updateStatusBar();
+    
+#ifdef ENABLE_IMAGE_FEATURES
+    // Image editing slots
+    void onInsertImage();
+    void onInsertImageFromFile();
+    void onEditImage();
+    void onResizeImage();
+    void onRotateImage();
+    void onCropImage();
+    void onApplyGrayscale();
+    void onApplyBlur();
+    void onApplySharpen();
+#endif
 
 private:
     void setupUI();
@@ -47,6 +66,13 @@ private:
     QString current_file_path_;
     bool is_dark_theme_ = false;
     int current_font_size_ = 12;
+    
+#ifdef ENABLE_IMAGE_FEATURES
+    // Image editing
+    std::unique_ptr<ImageEditorDialog> image_editor_;
+    QImage current_image_;
+    bool has_image_ = false;
+#endif
 };
 
 } // namespace gui

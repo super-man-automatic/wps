@@ -18,6 +18,7 @@ public:
     void saveFile();
     std::string getText() const;
     void setText(const std::string& text);
+    void insertImage(const QString& imagePath);
 
 signals:
     void contentChanged(const QString& text);
