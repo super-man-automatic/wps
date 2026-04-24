@@ -6,6 +6,8 @@
 #include <QString>
 #ifdef ENABLE_IMAGE_FEATURES
 #include <QImage>
+#include <QMap>
+#include <QList>
 #endif
 #include <memory>
 
@@ -72,6 +74,11 @@ private:
     std::unique_ptr<ImageEditorDialog> image_editor_;
     QImage current_image_;
     bool has_image_ = false;
+    
+    // Image history for undo (image_name -> list of historical versions)
+    QMap<QString, QList<QImage>> image_history_;
+    void saveImageToHistory(const QString& img_name, const QImage& image);
+    bool tryUndoImageEdit();
 #endif
 };
 

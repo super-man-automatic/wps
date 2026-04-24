@@ -86,6 +86,11 @@ QSize ImageWidget::imageSize() const {
     return QSize(imageData_->currentImage.cols, imageData_->currentImage.rows);
 }
 
+QImage ImageWidget::getCurrentImage() const {
+    if (!hasImage()) return QImage();
+    return cvMatToQPixmap(imageData_->currentImage).toImage();
+}
+
 void ImageWidget::setEditMode(ImageEditMode mode) {
     if (editMode_ == mode) return;
     
@@ -169,11 +174,19 @@ void ImageWidget::applyCrop() {
     pushHistory();
     
     cv::Mat cropped = cropMat(imageData_->currentImage, imageData_->cropRect);
-    if (!cropped.empty()) {
+    // Validate cropped image: must be non-empty with supported channel count (1, 3, or 4)
+    if (!cropped.empty() && (cropped.channels() == 1 || cropped.channels() == 3 || cropped.channels() == 4)) {
         imageData_->currentImage = cropped;
         imageData_->cropRect = QRect();
         isCropping_ = false;
-        setEditMode(ImageEditMode::None);
+        
+        // Directly set editMode_ to avoid infinite recursion with setEditMode -> cancelCrop -> setEditMode
+        ImageEditMode oldMode = editMode_;
+        editMode_ = ImageEditMode::None;
+        update();
+        if (oldMode != editMode_) {
+            emit editModeChanged(editMode_);
+        }
         
         updateDisplay();
         emit imageChanged();
@@ -200,7 +213,43 @@ void ImageWidget::applyGrayscale() {
     if (imageData_->currentImage.channels() == 3) {
         cv::cvtColor(imageData_->currentImage, gray, cv::COLOR_RGB2GRAY);
     } else if (imageData_->currentImage.channels() == 4) {
-        cv::cvtColor(imageData_->currentImage, gray, cv::COLOR_RGBA2GRAY);
+        // Fix: Split RGBA, fill transparent areas with white before grayscale
+        cv::Mat bgr;
+        cv::cvtColor(imageData_->currentImage, bgr, cv::COLOR_RGBA2BGR);
+        
+        // Split RGBA to get alpha channel
+        std::vector<cv::Mat> channels(4);
+        cv::Mat rgba;
+        cv::cvtColor(imageData_->currentImage, rgba, cv::COLOR_RGBA2BGRA);
+        cv::split(rgba, channels);
+        
+        // Alpha blending: composite over white background
+        // Convert to float for proper blending
+        cv::Mat bgr_f, alpha_f;
+        bgr.convertTo(bgr_f, CV_32F, 1.0 / 255.0);
+        channels[3].convertTo(alpha_f, CV_32F, 1.0 / 255.0);
+        
+        // Create white background in float
+        cv::Mat white_bg(bgr.size(), CV_32FC3, cv::Scalar(1.0, 1.0, 1.0));
+        
+        // Split BGR for per-channel blending
+        std::vector<cv::Mat> bgr_f_ch(3);
+        cv::split(bgr_f, bgr_f_ch);
+        std::vector<cv::Mat> white_ch(3);
+        cv::split(white_bg, white_ch);
+        
+        for (int i = 0; i < 3; i++) {
+            // blended = image * alpha + white * (1 - alpha)
+            cv::multiply(bgr_f_ch[i], alpha_f, bgr_f_ch[i]);
+            cv::Mat white_contrib;
+            cv::multiply(white_ch[i], cv::Scalar::all(1.0) - alpha_f, white_contrib);
+            cv::add(bgr_f_ch[i], white_contrib, bgr_f_ch[i]);
+        }
+        
+        cv::merge(bgr_f_ch, bgr_f);
+        // Convert back to 8-bit
+        bgr_f.convertTo(bgr, CV_8UC3, 255.0);
+        cv::cvtColor(bgr, gray, cv::COLOR_BGR2GRAY);
     } else {
         gray = imageData_->currentImage.clone();
     }
@@ -466,18 +515,31 @@ void ImageWidget::updateDisplay() {
     update();
 }
 
-QPixmap ImageWidget::cvMatToQPixmap(const cv::Mat& mat) {
-    if (mat.empty()) return QPixmap();
+QPixmap ImageWidget::cvMatToQPixmap(const cv::Mat& mat) const {
+    if (mat.empty() || mat.cols <= 0 || mat.rows <= 0) return QPixmap();
+    
+    // Validate channel count
+    int channels = mat.channels();
+    if (channels != 1 && channels != 3 && channels != 4) {
+        qWarning() << "cvMatToQPixmap: unsupported channel count:" << channels;
+        return QPixmap();
+    }
+    
+    // Ensure mat data is continuous for safe QImage construction
+    cv::Mat temp;
+    if (!mat.isContinuous()) {
+        temp = mat.clone();
+    } else {
+        temp = mat;
+    }
     
     QImage image;
-    if (mat.channels() == 3) {
-        image = QImage(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_RGB888);
-    } else if (mat.channels() == 4) {
-        image = QImage(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_RGBA8888);
-    } else if (mat.channels() == 1) {
-        image = QImage(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_Grayscale8);
-    } else {
-        return QPixmap();
+    if (channels == 3) {
+        image = QImage(temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+    } else if (channels == 4) {
+        image = QImage(temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGBA8888);
+    } else { // channels == 1
+        image = QImage(temp.data, temp.cols, temp.rows, temp.step, QImage::Format_Grayscale8);
     }
     
     // Make a deep copy to ensure data persistence

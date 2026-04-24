@@ -57,6 +57,7 @@ public:
     bool hasImage() const { return imageData_ && !imageData_->currentImage.empty(); }
     QSize imageSize() const;
     QString filePath() const { return imageData_ ? imageData_->filePath : QString(); }
+    QImage getCurrentImage() const;
     
     // 编辑操作
     void setEditMode(ImageEditMode mode);
@@ -115,7 +116,7 @@ protected:
 private:
     // 图片处理
     void updateDisplay();
-    QPixmap cvMatToQPixmap(const cv::Mat& mat);
+    QPixmap cvMatToQPixmap(const cv::Mat& mat) const;
     cv::Mat qImageToCvMat(const QImage& image);
     cv::Mat rotateMat(const cv::Mat& src, int degrees);
     cv::Mat cropMat(const cv::Mat& src, const QRect& rect);

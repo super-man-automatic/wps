@@ -17,9 +17,11 @@
   │  └─ ai_writer.h/cpp      - AI 写作助手
   │
   └─ GUI 模块 (gui/)
-     ├─ mainwindow.h/cpp     - 主窗口
-     ├─ editor_widget.h/cpp  - 编辑器
+     ├─ mainwindow.h/cpp     - 主窗口（含图片编辑菜单）
+     ├─ editor_widget.h/cpp  - 编辑器（含图片插入功能）
      ├─ ai_sidebar.h/cpp     - AI 侧边栏
+     ├─ image_editor_dialog.h/cpp - 图片编辑器对话框
+     ├─ image_widget.h/cpp   - 图片显示/编辑组件
      └─ main.cpp             - 程序入口
 
 ✅ 单元测试

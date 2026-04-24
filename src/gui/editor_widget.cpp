@@ -13,7 +13,7 @@
 namespace gui {
 
 EditorWidget::EditorWidget(QWidget* parent)
-    : QPlainTextEdit(parent),
+    : QTextEdit(parent),
       document_(std::make_shared<smartdoc::Document>()) {
 
     // 设置字体
@@ -22,12 +22,15 @@ EditorWidget::EditorWidget(QWidget* parent)
     setFont(font);
 
     // 连接信号
-    connect(this, &QPlainTextEdit::textChanged,
+    connect(this, &QTextEdit::textChanged,
             this, &EditorWidget::onTextChanged);
-    connect(this, &QPlainTextEdit::selectionChanged,
+    connect(this, &QTextEdit::selectionChanged,
             this, &EditorWidget::onSelectionChanged);
 
     setPlaceholderText("开始编写文档...\n使用侧边栏的AI功能辅助写作");
+    
+    // 启用撤销/重做功能
+    setUndoRedoEnabled(true);
 }
 
 EditorWidget::~EditorWidget() {
@@ -82,6 +85,10 @@ void EditorWidget::insertImage(const QString& imagePath) {
         image = image.scaledToWidth(600, Qt::SmoothTransformation);
     }
 
+    // Wrap in edit block for undo support
+    QTextCursor cursor = textCursor();
+    cursor.beginEditBlock();
+
     // 1. 把图片加入文档资源（关键！这样就不会显示占位符）
     QTextDocument* doc = document();
     QString imageName = "img_" + QString::number(QDateTime::currentMSecsSinceEpoch());
@@ -90,9 +97,8 @@ void EditorWidget::insertImage(const QString& imagePath) {
     doc->addResource(QTextDocument::ImageResource, imageUrl, QVariant(image));
 
     // 2. 插入图片（可自定义显示大小）
-    QTextCursor cursor = textCursor();
     QTextImageFormat imageFormat;
-    imageFormat.setName(imageUrl.toString());
+    imageFormat.setName(imageName);  // 直接用名称，不要用 URL.toString()
     imageFormat.setWidth(image.width());
     imageFormat.setHeight(image.height());
 
@@ -100,6 +106,8 @@ void EditorWidget::insertImage(const QString& imagePath) {
 
     // 换行
     cursor.insertText("\n");
+    
+    cursor.endEditBlock();
     setTextCursor(cursor);
 }
 

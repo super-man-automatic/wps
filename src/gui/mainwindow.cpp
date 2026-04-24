@@ -12,6 +12,8 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QTextCursor>
+#include <QTextImageFormat>
+#include <QTextDocument>
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
@@ -19,6 +21,7 @@
 #include <QRegularExpression>
 #include <QStatusBar>
 #include <QShortcut>
+#include <QApplication>
 #ifdef ENABLE_IMAGE_FEATURES
 #include <QImageReader>
 #include <QBuffer>
@@ -101,6 +104,41 @@ void MainWindow::setupMenuBar() {
     auto exit_action = file_menu->addAction(tr("E&xit"));
     exit_action->setShortcut(QKeySequence::Quit);
     connect(exit_action, &QAction::triggered, this, &QWidget::close);
+
+    // Edit menu - Undo/Redo support
+    auto edit_menu = menuBar()->addMenu(tr("&Edit"));
+    
+    auto undo_action = edit_menu->addAction(tr("&Undo"));
+    undo_action->setShortcut(QKeySequence::Undo);
+    connect(undo_action, &QAction::triggered, this, [this]() {
+        if (editor_) editor_->undo();
+    });
+    
+    auto redo_action = edit_menu->addAction(tr("&Redo"));
+    redo_action->setShortcut(QKeySequence::Redo);
+    connect(redo_action, &QAction::triggered, this, [this]() {
+        if (editor_) editor_->redo();
+    });
+    
+    edit_menu->addSeparator();
+    
+    auto cut_action = edit_menu->addAction(tr("Cu&t"));
+    cut_action->setShortcut(QKeySequence::Cut);
+    connect(cut_action, &QAction::triggered, this, [this]() {
+        if (editor_) editor_->cut();
+    });
+    
+    auto copy_action = edit_menu->addAction(tr("&Copy"));
+    copy_action->setShortcut(QKeySequence::Copy);
+    connect(copy_action, &QAction::triggered, this, [this]() {
+        if (editor_) editor_->copy();
+    });
+    
+    auto paste_action = edit_menu->addAction(tr("&Paste"));
+    paste_action->setShortcut(QKeySequence::Paste);
+    connect(paste_action, &QAction::triggered, this, [this]() {
+        if (editor_) editor_->paste();
+    });
 
     // Format menu
     auto format_menu = menuBar()->addMenu(tr("F&ormat"));
@@ -398,7 +436,16 @@ void MainWindow::keyPressEvent(QKeyEvent* event) {
         return; // Don't propagate to editor
     }
     
-    // Default handling for other keys (including Ctrl+Z for undo, Ctrl+Y for redo)
+    #ifdef ENABLE_IMAGE_FEATURES
+    // Handle Ctrl+Z for image undo first, then fall back to document undo
+    if (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_Z) {
+        if (editor_ && tryUndoImageEdit()) {
+            return; // Image undo handled
+        }
+    }
+#endif
+    
+    // Default handling for other keys
     QMainWindow::keyPressEvent(event);
 }
 
@@ -435,9 +482,63 @@ void MainWindow::onInsertImageFromFile() {
     }
 }
 
+// Helper to find all images in selection - returns list of (position, image_name) pairs
+static QList<QPair<int, QString>> findSelectedImages(QTextEdit* editor) {
+    QList<QPair<int, QString>> results;
+    QTextCursor cursor = editor->textCursor();
+    
+    if (!cursor.hasSelection()) {
+        // No selection - check if cursor is on a single image
+        int pos = cursor.position();
+        QTextImageFormat fmt = cursor.charFormat().toImageFormat();
+        if (!fmt.isValid() && pos > 0) {
+            cursor.setPosition(pos - 1);
+            fmt = cursor.charFormat().toImageFormat();
+            if (fmt.isValid()) {
+                pos = pos - 1;
+            }
+        }
+        if (fmt.isValid()) {
+            results.append(qMakePair(pos, fmt.name()));
+        }
+        return results;
+    }
+    
+    // Has selection - find all images in the selected range
+    int start = cursor.selectionStart();
+    int end = cursor.selectionEnd();
+    
+    QTextCursor scan(editor->document());
+    for (int pos = start; pos < end; ++pos) {
+        scan.setPosition(pos);
+        QTextImageFormat fmt = scan.charFormat().toImageFormat();
+        if (fmt.isValid()) {
+            results.append(qMakePair(pos, fmt.name()));
+        }
+    }
+    
+    return results;
+}
+
 void MainWindow::onEditImage() {
-    if (!has_image_) {
-        QMessageBox::information(this, tr("No Image"), tr("Please insert an image first."));
+    if (!editor_) return;
+    
+    auto images = findSelectedImages(editor_.get());
+    if (images.isEmpty()) {
+        QMessageBox::information(this, tr("No Image"), tr("Please select an image first."));
+        return;
+    }
+    
+    // For simplicity, edit only the first selected image
+    int pos = images.first().first;
+    QString img_name = images.first().second;
+    
+    QTextCursor cursor(editor_->document());
+    cursor.setPosition(pos);
+    
+    QImage image = editor_->document()->resource(QTextDocument::ImageResource, QUrl(img_name)).value<QImage>();
+    if (image.isNull()) {
+        QMessageBox::warning(this, tr("Error"), tr("Failed to get image"));
         return;
     }
     
@@ -445,44 +546,48 @@ void MainWindow::onEditImage() {
         image_editor_ = std::make_unique<ImageEditorDialog>(this);
     }
     
-    if (image_editor_->loadImage(current_image_)) {
+    if (image_editor_->loadImage(image)) {
         if (image_editor_->exec() == QDialog::Accepted) {
-            current_image_ = image_editor_->getResultImage();
-            statusBar()->showMessage(tr("Image edited successfully"), 2000);
+            QImage result = image_editor_->getResultImage();
+            if (!result.isNull()) {
+                cursor.beginEditBlock();
+                cursor.deleteChar();
+                // Generate NEW unique name for edited image (enables undo)
+                QString new_img_name = "img_" + QString::number(QDateTime::currentMSecsSinceEpoch());
+                editor_->document()->addResource(QTextDocument::ImageResource, QUrl(new_img_name), QVariant(result));
+                QTextImageFormat new_fmt;
+                new_fmt.setName(new_img_name);
+                new_fmt.setWidth(result.width());
+                new_fmt.setHeight(result.height());
+                new_fmt.setVerticalAlignment(QTextCharFormat::AlignMiddle);
+                cursor.insertImage(new_fmt);
+                cursor.endEditBlock();
+                cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor);
+                editor_->setTextCursor(cursor);
+                statusBar()->showMessage(tr("Image edited successfully"), 2000);
+            }
         }
     }
 }
 
 void MainWindow::onResizeImage() {
-    if (!has_image_) {
-        QMessageBox::information(this, tr("No Image"), tr("Please insert an image first."));
-        return;
-    }
-    
-    onEditImage();
+    onEditImage();  // Use same logic as edit
 }
 
 void MainWindow::onRotateImage() {
-    if (!has_image_) {
-        QMessageBox::information(this, tr("No Image"), tr("Please insert an image first."));
-        return;
-    }
-    
-    onEditImage();
+    onEditImage();  // Use same logic as edit
 }
 
 void MainWindow::onCropImage() {
-    if (!has_image_) {
-        QMessageBox::information(this, tr("No Image"), tr("Please insert an image first."));
-        return;
-    }
-    
-    onEditImage();
+    onEditImage();  // Use same logic as edit
 }
 
 void MainWindow::onApplyGrayscale() {
-    if (!has_image_) {
-        QMessageBox::information(this, tr("No Image"), tr("Please insert an image first."));
+    if (!editor_) return;
+    
+    auto images = findSelectedImages(editor_.get());
+    if (images.isEmpty()) {
+        QMessageBox::information(this, tr("No Image"), tr("Please select one or more images first."));
         return;
     }
     
@@ -490,17 +595,52 @@ void MainWindow::onApplyGrayscale() {
         image_editor_ = std::make_unique<ImageEditorDialog>(this);
     }
     
-    if (image_editor_->loadImage(current_image_)) {
-        // Apply grayscale directly
-        image_editor_->applyGrayscale();
-        current_image_ = image_editor_->getResultImage();
-        statusBar()->showMessage(tr("Grayscale filter applied"), 2000);
+        int count = 0;
+    for (const auto& img_info : images) {
+        int pos = img_info.first;
+        QString img_name = img_info.second;
+        QTextCursor cursor(editor_->document());
+        cursor.setPosition(pos);
+        
+        QImage image = editor_->document()->resource(QTextDocument::ImageResource, QUrl(img_name)).value<QImage>();
+        if (image.isNull()) continue;
+        
+        if (image_editor_->loadImage(image)) {
+            saveImageToHistory(img_name, image);
+            image_editor_->applyGrayscale();
+            QImage result = image_editor_->getResultImage();
+            if (!result.isNull()) {
+                cursor.beginEditBlock();
+                // Delete old image
+                cursor.deleteChar();
+                // Generate NEW unique name for edited image (enables undo)
+                QString new_img_name = "img_" + QString::number(QDateTime::currentMSecsSinceEpoch());
+                editor_->document()->addResource(QTextDocument::ImageResource, QUrl(new_img_name), QVariant(result));
+                QTextImageFormat new_fmt;
+                new_fmt.setName(new_img_name);
+                new_fmt.setWidth(result.width());
+                new_fmt.setHeight(result.height());
+                new_fmt.setVerticalAlignment(QTextCharFormat::AlignMiddle);
+                cursor.insertImage(new_fmt);
+                cursor.endEditBlock();
+                cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor);
+                editor_->setTextCursor(cursor);
+                count++;
+            }
+        }
+    }
+    
+    if (count > 0) {
+        statusBar()->showMessage(tr("Grayscale applied to %1 image(s)").arg(count), 2000);
     }
 }
 
 void MainWindow::onApplyBlur() {
-    if (!has_image_) {
-        QMessageBox::information(this, tr("No Image"), tr("Please insert an image first."));
+    if (!editor_) return;
+    
+    auto images = findSelectedImages(editor_.get());
+    if (images.isEmpty()) {
+        QMessageBox::information(this, tr("No Image"), tr("Please select one or more images first."));
         return;
     }
     
@@ -508,16 +648,50 @@ void MainWindow::onApplyBlur() {
         image_editor_ = std::make_unique<ImageEditorDialog>(this);
     }
     
-    if (image_editor_->loadImage(current_image_)) {
-        image_editor_->applyBlur(5);
-        current_image_ = image_editor_->getResultImage();
-        statusBar()->showMessage(tr("Blur filter applied"), 2000);
+    int count = 0;
+    for (const auto& img_info : images) {
+        int pos = img_info.first;
+        QString img_name = img_info.second;
+        QTextCursor cursor(editor_->document());
+        cursor.setPosition(pos);
+        
+        QImage image = editor_->document()->resource(QTextDocument::ImageResource, QUrl(img_name)).value<QImage>();
+        if (image.isNull()) continue;
+        
+        if (image_editor_->loadImage(image)) {
+            saveImageToHistory(img_name, image);
+            image_editor_->applyBlur(5);
+            QImage result = image_editor_->getResultImage();
+            if (!result.isNull()) {
+                cursor.beginEditBlock();
+                cursor.deleteChar();
+                QString new_img_name = "img_" + QString::number(QDateTime::currentMSecsSinceEpoch());
+                editor_->document()->addResource(QTextDocument::ImageResource, QUrl(new_img_name), QVariant(result));
+                QTextImageFormat new_fmt;
+                new_fmt.setName(new_img_name);
+                new_fmt.setWidth(result.width());
+                new_fmt.setHeight(result.height());
+                new_fmt.setVerticalAlignment(QTextCharFormat::AlignMiddle);
+                cursor.insertImage(new_fmt);
+                cursor.endEditBlock();
+                cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor);
+                editor_->setTextCursor(cursor);
+                count++;
+            }
+        }
+    }
+    
+    if (count > 0) {
+        statusBar()->showMessage(tr("Blur applied to %1 image(s)").arg(count), 2000);
     }
 }
 
 void MainWindow::onApplySharpen() {
-    if (!has_image_) {
-        QMessageBox::information(this, tr("No Image"), tr("Please insert an image first."));
+    if (!editor_) return;
+    
+    auto images = findSelectedImages(editor_.get());
+    if (images.isEmpty()) {
+        QMessageBox::information(this, tr("No Image"), tr("Please select one or more images first."));
         return;
     }
     
@@ -525,15 +699,146 @@ void MainWindow::onApplySharpen() {
         image_editor_ = std::make_unique<ImageEditorDialog>(this);
     }
     
-    if (image_editor_->loadImage(current_image_)) {
-        image_editor_->applySharpen();
-        current_image_ = image_editor_->getResultImage();
-        statusBar()->showMessage(tr("Sharpen filter applied"), 2000);
+    int count = 0;
+    for (const auto& img_info : images) {
+        int pos = img_info.first;
+        QString img_name = img_info.second;
+        QTextCursor cursor(editor_->document());
+        cursor.setPosition(pos);
+        
+        QImage image = editor_->document()->resource(QTextDocument::ImageResource, QUrl(img_name)).value<QImage>();
+        if (image.isNull()) continue;
+        
+        if (image_editor_->loadImage(image)) {
+            saveImageToHistory(img_name, image);
+            image_editor_->applySharpen();
+            QImage result = image_editor_->getResultImage();
+            if (!result.isNull()) {
+                cursor.beginEditBlock();
+                cursor.deleteChar();
+                QString new_img_name = "img_" + QString::number(QDateTime::currentMSecsSinceEpoch());
+                editor_->document()->addResource(QTextDocument::ImageResource, QUrl(new_img_name), QVariant(result));
+                QTextImageFormat new_fmt;
+                new_fmt.setName(new_img_name);
+                new_fmt.setWidth(result.width());
+                new_fmt.setHeight(result.height());
+                new_fmt.setVerticalAlignment(QTextCharFormat::AlignMiddle);
+                cursor.insertImage(new_fmt);
+                cursor.endEditBlock();
+                cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor);
+                editor_->setTextCursor(cursor);
+                count++;
+            }
+        }
+    }
+    
+    if (count > 0) {
+        statusBar()->showMessage(tr("Sharpen applied to %1 image(s)").arg(count), 2000);
     }
 }
 
 void MainWindow::onInsertImage() {
     onInsertImageFromFile();
+}
+
+// Save image to history before editing (for undo support)
+void MainWindow::saveImageToHistory(const QString& img_name, const QImage& image) {
+    if (!image_history_.contains(img_name)) {
+        image_history_[img_name] = QList<QImage>();
+    }
+    image_history_[img_name].append(image.copy());
+    while (image_history_[img_name].size() > 10) {
+        image_history_[img_name].removeFirst();
+    }
+}
+
+// Try to undo image edit - returns true if handled
+bool MainWindow::tryUndoImageEdit() {
+    if (!editor_) return false;
+    
+    // Step 1: Check if current position has an image with history
+    QTextCursor cursor = editor_->textCursor();
+    QTextImageFormat img_fmt = cursor.charFormat().toImageFormat();
+    
+    if (!img_fmt.isValid()) {
+        cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+        img_fmt = cursor.charFormat().toImageFormat();
+    }
+    
+    if (!img_fmt.isValid()) {
+        qDebug() << "tryUndoImageEdit: No image at cursor";
+        return false; // No image here
+    }
+    
+    QString current_img_name = img_fmt.name();
+    qDebug() << "tryUndoImageEdit: Current image:" << current_img_name;
+    qDebug() << "tryUndoImageEdit: History keys:" << image_history_.keys();
+    
+    // Step 2: Check if we have history for this image name
+    // (This handles the case where we reuse the same name)
+    if (image_history_.contains(current_img_name) && !image_history_[current_img_name].isEmpty()) {
+        qDebug() << "tryUndoImageEdit: Found direct history for" << current_img_name;
+        QImage previous = image_history_[current_img_name].takeLast();
+        
+        // Undo document operation first
+        editor_->undo();
+        
+        // Restore resource
+        editor_->document()->addResource(QTextDocument::ImageResource, QUrl(current_img_name), QVariant(previous));
+        editor_->document()->setModified(true);
+        editor_->viewport()->update();
+        
+        qDebug() << "tryUndoImageEdit: Restored (direct match)";
+        return true;
+    }
+    
+    // Step 3: If no direct history, this might be a new-named image after edit
+    // We need to undo and then check what image appears
+    qDebug() << "tryUndoImageEdit: No direct history, performing undo to find old image";
+    
+    bool had_history = false;
+    QString old_img_name;
+    QImage previous_image;
+    
+    // Perform the undo
+    editor_->undo();
+    
+    // Now check what image is at the cursor after undo
+    QTextCursor after_cursor = editor_->textCursor();
+    QTextImageFormat after_fmt = after_cursor.charFormat().toImageFormat();
+    
+    if (!after_fmt.isValid()) {
+        after_cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+        after_fmt = after_cursor.charFormat().toImageFormat();
+    }
+    
+    if (after_fmt.isValid()) {
+        old_img_name = after_fmt.name();
+        qDebug() << "tryUndoImageEdit: After undo, found image:" << old_img_name;
+        
+        if (image_history_.contains(old_img_name) && !image_history_[old_img_name].isEmpty()) {
+            previous_image = image_history_[old_img_name].takeLast();
+            had_history = true;
+            qDebug() << "tryUndoImageEdit: Found history for old image";
+        } else {
+            qDebug() << "tryUndoImageEdit: No history for old image";
+        }
+    } else {
+        qDebug() << "tryUndoImageEdit: No image found after undo";
+    }
+    
+    if (had_history) {
+        // Restore the old image resource
+        editor_->document()->addResource(QTextDocument::ImageResource, QUrl(old_img_name), QVariant(previous_image));
+        editor_->document()->setModified(true);
+        editor_->viewport()->update();
+        qDebug() << "tryUndoImageEdit: Restored old image resource";
+        return true;
+    }
+    
+    // No image history found, undo was already performed
+    qDebug() << "tryUndoImageEdit: No history found, returning true anyway";
+    return true; // We handled the undo (even though no image was restored)
 }
 #endif
 

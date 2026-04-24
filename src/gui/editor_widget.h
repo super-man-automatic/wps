@@ -1,5 +1,5 @@
 #pragma once
-#include <QPlainTextEdit>
+#include <QTextEdit>
 #include <memory>
 
 namespace smartdoc {
@@ -8,7 +8,7 @@ class Document;
 
 namespace gui {
 
-class EditorWidget : public QPlainTextEdit {
+class EditorWidget : public QTextEdit {
     Q_OBJECT
 public:
     explicit EditorWidget(QWidget* parent = nullptr);

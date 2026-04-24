@@ -315,7 +315,8 @@ bool ImageEditorDialog::loadImage(const QImage& image) {
 }
 
 QImage ImageEditorDialog::getResultImage() const {
-    return imageWidget_->grab().toImage();
+    // Return the actual processed image, not a widget grab
+    return imageWidget_->getCurrentImage();
 }
 
 bool ImageEditorDialog::saveResult(const QString& filePath) {

@@ -19,9 +19,11 @@
 - [x] ai_writer.h / ai_writer.cpp - AI 写作助手
 
 #### 界面模块 (src/gui/)
-- [x] mainwindow.h / mainwindow.cpp - 主窗口
-- [x] editor_widget.h / editor_widget.cpp - 编辑器组件
+- [x] mainwindow.h / mainwindow.cpp - 主窗口（含图片编辑菜单）
+- [x] editor_widget.h / editor_widget.cpp - 编辑器组件（富文本+图片）
 - [x] ai_sidebar.h / ai_sidebar.cpp - AI 侧边栏
+- [x] image_editor_dialog.h / image_editor_dialog.cpp - 图片编辑对话框
+- [x] image_widget.h / image_widget.cpp - 图片显示/处理组件
 
 #### 入口
 - [x] main.cpp - 应用程序入口
@@ -37,11 +39,11 @@
 
 | 统计项 | 数值 |
 |--------|------|
-| 总文件数 | 20+ |
-| C++ 源文件 | 12 |
-| 头文件 | 8 |
+| 总文件数 | 25+ |
+| C++ 源文件 | 16 |
+| 头文件 | 10 |
 | 单元测试 | 2 |
-| 代码行数 | ~2000+ |
+| 代码行数 | ~2500+ |
 
 ---
 
@@ -78,9 +80,11 @@
 
 ### Qt GUI
 - [x] 主窗口架构
-- [x] 编辑器组件（基于 QPlainTextEdit）
+- [x] 编辑器组件（基于 QTextEdit，支持富文本和图片）
 - [x] AI 侧边栏（按钮、对话框、响应显示）
-- [x] 菜单栏（新建、打开、保存）
+- [x] 菜单栏（新建、打开、保存、图片编辑）
+- [x] 图片编辑功能（插入/编辑/裁剪/旋转/滤镜）
+- [x] 文档级撤销/重做（Ctrl+Z/Y）
 - [x] 加载指示器
 - [x] 线程安全的 UI 更新（Qt::QueuedConnection）
 
@@ -204,13 +208,15 @@ QMetaObject::invokeMethod(this, [this, text]() {
 
 ## ✨ 项目特色总结
 
-✅ **现代 C++17** - 使用最新 C++ 特性  
-✅ **线程安全** - shared_mutex 保证并发安全  
-✅ **模块化设计** - 清晰的分层架构  
-✅ **Qt 6 GUI** - 专业级用户界面  
-✅ **完整测试** - Google Test 框架  
-✅ **易于扩展** - 插件系统架构预留  
-✅ **AI 就绪** - OpenAI API 集成准备  
+✅ **现代 C++17** - 使用最新 C++ 特性
+✅ **线程安全** - shared_mutex 保证并发安全
+✅ **模块化设计** - 清晰的分层架构
+✅ **Qt 6 GUI** - 专业级用户界面（富文本+图片）
+✅ **图片编辑** - OpenCV 图像处理（裁剪/旋转/滤镜）
+✅ **文档级撤销** - 统一撤销/重做（文本+图片）
+✅ **完整测试** - Google Test 框架
+✅ **易于扩展** - 插件系统架构预留
+✅ **AI 就绪** - OpenAI API 集成准备
 ✅ **开源友好** - MIT 许可证，文档齐全  
 
 ---

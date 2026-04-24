@@ -170,9 +170,11 @@ wps/
 │   │   ├── prompt_manager.h/cpp # ✅ 提示词
 │   │   └── ai_writer.h/cpp      # ✅ AI 写作
 │   └── gui/
-│       ├── mainwindow.h/cpp     # ✅ 主窗口
-│       ├── editor_widget.h/cpp  # ✅ 编辑器
-│       └── ai_sidebar.h/cpp     # ✅ AI 侧边栏
+│       ├── mainwindow.h/cpp     # ✅ 主窗口（含图片编辑菜单）
+│       ├── editor_widget.h/cpp  # ✅ 编辑器（富文本+图片）
+│       ├── ai_sidebar.h/cpp     # ✅ AI 侧边栏
+│       ├── image_editor_dialog.h/cpp # ✅ 图片编辑器对话框
+│       └── image_widget.h/cpp   # ✅ 图片显示/编辑组件
 ├── tests/
 │   ├── core_tests/test_document.cpp    # ✅ 文档测试
 │   ├── ai_tests/test_llm_client.cpp    # ✅ AI 测试
@@ -192,18 +194,22 @@ wps/
 
 ✅ **SmartDoc 窗口打开**
 - 标题栏：SmartDoc AI Editor
-- 左侧：大文本编辑框（可输入文字）
+- 左侧：富文本编辑框（可输入文字、插入图片）
 - 右侧：AI 侧边栏
   - 3 个按钮：📝 续写、✏️ 润色、📋 摘要
   - 聊天历史区域
   - AI 响应显示框
   - 输入框和发送按钮
-- 菜单：File (新建/打开/保存/退出) 和 Help (关于)
+- 菜单：
+  - File (新建/打开/保存/退出)
+  - 图片编辑 (插入/编辑/裁剪/旋转/滤镜/撤销)
+  - Help (关于)
 
 ✅ **可以交互**
 - 在左侧输入文字
-- 点击"续写"按钮
-- 看到 AI 侧边栏的响应框显示文字（Mock 演示）
+- 点击"续写"按钮，看到 AI 侧边栏的响应框显示文字
+- 插入图片并编辑（裁剪、旋转、灰度、模糊、锐化）
+- 使用 Ctrl+Z 撤销图片编辑操作
 
 ✅ **没有编译错误或崩溃**
 
